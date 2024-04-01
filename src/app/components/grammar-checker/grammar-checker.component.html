@@ -1,0 +1,63 @@
+<div class="w-screen h-screen">
+  <div class="flex gap-6 p-6 bg-[#fbfbfd]">
+    <div class="w-full h-[91vh]">
+      <textarea
+        (keyup)="inputtedText($event)"
+        (paste)="onPasteText($event)"
+        class="w-full h-full text-[#404040] focus:outline-none pl-6 pr-4 py-10 rounded-lg shadow-[1px_1px_5px_0px_rgba(0,0,0,0.25)] hidden-scrollbar resize-none"
+        placeholder="Start by writing, pasting (Ctrl + V) text, or uploading a document (doc, pdf)."
+      ></textarea>
+    </div>
+    <!-- <div class="w-48 h-48 bg-pink-400 overflow-auto">
+      <p>
+        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Eum inventore
+        pariatur odit nemo obcaecati debitis ab, minima minus beatae cumque
+        error nisi! Nemo atque libero voluptatum aliquid dolorem consectetur
+        impedit, ipsam qui exercitationem veniam maiores quo quam sequi
+        laboriosam! Odit reiciendis nobis minus minima vitae alias voluptate,
+        illum exercitationem eaque praesentium tempora ea ut voluptates est
+        aspernatur. Sint et, fugit illum voluptatibus reiciendis aliquid cum
+        magni nobis quidem iure recusandae voluptas nihil unde earum maiores
+        repudiandae ea quod! Hic tenetur facilis cum perferendis iste possimus
+        dicta dignissimos quia, non obcaecati placeat dolorum ipsa, assumenda
+        accusamus quibusdam neque rem dolore cupiditate!
+      </p>
+    </div> -->
+
+    <div
+      class="hidden md:block w-full h-[91vh] bg-gray-400 text-white focus:outline-none pl-6 pr-4 py-10 rounded-lg shadow-[1px_1px_5px_0px_rgba(0,0,0,0.25)] overflow-y-auto hidden-scrollbar"
+    >
+      <!-- <ng-container
+        *ngFor="
+          let item of returned.breakdown_user_input_sentences
+            .user_input_breakdown;
+          let i = index
+        "
+      >
+        <span class="original-sentence">{{ item }}.</span><span>{{ " " }}</span>
+      </ng-container> -->
+      <div class="relative w-full">
+        <ng-container *ngFor="let sentence of originalSentence; let i = index">
+          <span class="original-sentence">{{ sentence }}.</span>
+          <span>{{ " " }}</span>
+
+          <!-- <span
+            class="-top-9 left-0 absolute h-6 bg-green-400 cursor-pointer translate-x-1/2 translate-y-1/2"
+            >Correct Grammar</span
+          >
+          <span
+            class="top-9 left-1/4 absolute h-6 bg-blue-400 cursor-pointer translate-x-1/2 -translate-y-1/2"
+            >Rephrase</span
+          > -->
+        </ng-container>
+
+        <span class="-top-6 left-0 absolute h-6 bg-green-400 break-words">{{
+          correctGrammar[1]
+        }}</span>
+        <span class="top-6 left-0 absolute h-6 bg-blue-400 break-words">{{
+          rephraseSentence[1]
+        }}</span>
+      </div>
+    </div>
+  </div>
+</div>

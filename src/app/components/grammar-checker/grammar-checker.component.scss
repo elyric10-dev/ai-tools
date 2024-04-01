@@ -1,0 +1,17 @@
+.hidden-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.original-sentence {
+  background-color: transparent;
+  transition: 0.3s;
+}
+
+.original-sentence:hover {
+  background-color: rgba(255, 192, 203, 0.696);
+}
+
+.highlight-wrong-spelling {
+  color: red;
+}
