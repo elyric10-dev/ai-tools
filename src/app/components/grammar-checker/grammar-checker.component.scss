@@ -4,14 +4,159 @@
 }
 
 .original-sentence {
-  background-color: transparent;
+  position: relative;
+  background-color: rgb(240, 240, 240);
+  color: #252525;
+  padding: 0 2px;
+  cursor: pointer;
   transition: 0.3s;
+  border: 1px solid transparent;
 }
 
 .original-sentence:hover {
-  background-color: rgba(255, 192, 203, 0.696);
+  background-color: rgb(220, 220, 220);
+  padding: 0 2px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
 }
 
-.highlight-wrong-spelling {
+.label {
+  font-size: 10px;
+}
+
+.correct-grammar {
+  display: grid;
+  gap: 2px;
+  height: 0;
+  overflow: hidden;
+  visibility: visible;
+  background-color: rgba(0, 0, 0, 0.75);
+  text-wrap: stable;
+  line-height: 12px;
+  color: whitesmoke;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transition: 0.3s;
+}
+
+.correct-grammar:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.original-sentence .correct-grammar.active {
+  // width: max-content;
+  height: auto;
+  visibility: visible;
+  padding: 0 4px;
+  padding-top: 4px;
+  padding-bottom: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.8);
+  z-index: 50;
+}
+
+.rephrase {
+  display: grid;
+  gap: 2px;
+  height: 0;
+  overflow: hidden;
+  visibility: visible;
+  background-color: rgba(100, 0, 0, 0.75);
+  text-wrap: stable;
+  line-height: 12px;
+  color: whitesmoke;
+  position: absolute;
+  top: 6%;
+  left: 0%;
+  transition: 0.3s;
+}
+
+.rephrase:hover {
+  background-color: rgba(100, 0, 0, 0.9);
+}
+
+.original-sentence .rephrase.active {
+  width: max-content;
+  height: auto;
+  visibility: visible;
+  padding: 0 2px;
+  padding-top: 2px;
+  padding-bottom: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: -2px -0px 10px rgba(0, 0, 0, 0.8);
+  z-index: 50;
+}
+
+.highlight-problem {
+  display: inline-flex;
+  position: relative;
+  background-color: rgb(255, 220, 220);
+  cursor: default;
   color: red;
+  transition: 0.3s;
+  text-decoration: line-through;
+  text-decoration-thickness: 0.5px;
+}
+
+.highlight-problem:hover {
+  background-color: rgb(255, 220, 220);
+}
+
+.corrected-problem {
+  display: grid;
+  height: 0;
+  visibility: hidden;
+  position: absolute;
+  overflow: hidden;
+  top: 22px;
+  left: 0;
+  padding: 0 2px;
+  border-radius: 4px;
+  color: rgb(9, 152, 9);
+  transition: 0.3s;
+  transform-origin: top;
+  z-index: 100;
+}
+
+.highlight-problem:hover .corrected-problem {
+  width: max-content;
+  height: 40px;
+  background-color: whitesmoke;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+  visibility: visible;
+  cursor: pointer;
+}
+
+.highlight-problem:hover .corrected-problem:hover {
+  background-color: rgb(214, 252, 233);
+}
+
+::ng-deep .panelClass .mdc-dialog__surface {
+  background-color: transparent !important;
+}
+
+.moving-gradient {
+  background-image: linear-gradient(
+    to right,
+    #14274e,
+    #3d6184,
+    #3d6184,
+    #14274e
+  );
+  background-size: 500% auto;
+  animation: moving-gradient 10s linear infinite;
+}
+
+@keyframes moving-gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

@@ -1,225 +1,178 @@
-import { Component } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
 import { OpenAiService } from '../../open-ai.service';
+import { ClaudeService } from '../../claude.service';
+import {
+  ToastMessageService,
+  ToastMessageType,
+} from '../toast-message/toast-message.service';
+import { MatDialog } from '@angular/material/dialog';
+import { SentenceModalComponent } from './sentence/sentence-modal/sentence-modal.component';
 
 @Component({
   selector: 'app-grammar-checker',
   templateUrl: './grammar-checker.component.html',
   styleUrl: './grammar-checker.component.scss',
 })
-export class GrammarCheckerComponent {
+export class GrammarCheckerComponent implements OnInit {
+  @ViewChild('button1') button1!: ElementRef;
+  @ViewChild('button2') button2!: ElementRef;
+
   private checkerSubject = new Subject<string>();
   checkedResponse: any = '';
   textToCheck: string = '';
   isLoading: boolean = false;
 
-  originalSentence: any[] = [];
-  correctGrammar: any[] = [];
-  rephraseSentence: any[] = [];
+  correctGrammarElement =
+    this.elementRef.nativeElement.querySelector('.correct-grammar');
+  isHoveringOriginalSentence: boolean[] = [false];
 
-  wrongSpellingWords: any[] = [];
+  errorMessage: string = '';
+  showMobileResult: boolean = false;
+  currentScreenSize: number = 0;
 
-  verbTensesWords: any[] = [];
-  singularPlurals: any[] = [];
-
-  constructor(private openAiService: OpenAiService) {
+  constructor(
+    private elementRef: ElementRef,
+    private openAiService: OpenAiService,
+    private claudeService: ClaudeService,
+    private toastService: ToastMessageService,
+    private dialog: MatDialog
+  ) {
     this.checkerSubject
       .pipe(debounceTime(1000))
       .subscribe(() => this.checkGrammar(this.textToCheck));
-
-    // this.hasWrongSpellingWord(0);
-
-    this.extractData();
-
-    // console.log(this.originalSentence[0]);
-    const word = 'hotl';
-    console.log(this.originalSentence[1].includes(word));
-
-    // console.log(this.originalSentence[1].includes('droped'));
-    // console.log(this.originalSentence[1].includes('lugage'));
-    // console.log(this.originalSentence[2]);
-    // console.log(this.originalSentence[3]);
-    // console.log(this.originalSentence[4]);
-    // this.replaceWrongWords(this.originalSentence, this.wrongSpellingWords);
   }
 
-  // replaceWrongWords(sentences: string[], corrections: any[]) {
-  //   sentences.forEach((sentence, index) => {
-  //     corrections.forEach((correction) => {
-  //       if (correction.what_sentence_array_number_belong === index) {
-  //         correction.wrong_spelling_word.forEach(
-  //           (wrongWord: any, i: number) => {
-  //             const regex = new RegExp(`\\b${wrongWord}\\b`, 'gi');
-  //             sentences[index] = sentences[index].replace(
-  //               regex,
-  //               correction.corrected[i]
-  //             );
-  //           }
-  //         );
-  //       }
-  //     });
-  //   });
-  //   console.log(sentences);
-  //   return sentences;
+  isButton1Clicked = false;
+  isButton2Clicked = false;
+  isShowOptions = false;
+
+
+
+  // showOptions() {
+  //   this.isShowOptions = !this.isShowOptions;
   // }
 
-  extractData() {
-    this.originalSentence =
-      this.returned.breakdown_user_input_sentences.user_input_breakdown;
-    this.correctGrammar =
-      this.returned.breakdown_user_input_sentences.correct_grammar;
-    this.rephraseSentence =
-      this.returned.breakdown_user_input_sentences.rephrase_sentence;
+  onClick() {
+    console.log('clicked!');
+    this.isButton1Clicked = true;
+    this.isButton2Clicked = true;
+    // this.isShowOptions = !this.isShowOptions;
 
-    this.wrongSpellingWords =
-      this.returned.wrong_spelling_words_each_sentence.wrong_spelling_words;
-
-    this.verbTensesWords =
-      this.returned.verb_tenses_words.user_input_wrong_verb_tenses;
-
-    this.singularPlurals =
-      this.returned.singular_plurals.user_input_wrong_singular_plurals;
-
-    console.log(this.originalSentence);
-    console.log(this.correctGrammar);
+    this.dialog.open(SentenceModalComponent, { panelClass: 'panelClass' });
   }
+
+  resetFlags() {
+    this.isButton1Clicked = false;
+    this.isButton2Clicked = false;
+  }
+
+  ngOnInit(): void {
+    this.currentScreenSize = window.innerWidth;
+  }
+
+  hideShowMobileResult() {
+    this.showMobileResult = !this.showMobileResult;
+    console.log('clicked!', this.showMobileResult);
+  }
+
+  // openGrammarParaphrase() {
+  // }
 
   inputtedText(event: Event) {
-    this.textToCheck = (
-      event.target as HTMLInputElement
-    ).value.toLocaleLowerCase();
-
-    if (this.textToCheck !== '') this.checkerSubject.next(this.textToCheck);
-    else this.textToCheck = '';
-  }
-
-  onPasteText(event: ClipboardEvent) {
-    this.textToCheck = '';
-    const clipboardData = event.clipboardData || (window as any).clipboardData;
-    const pastedText = clipboardData.getData('text');
-    this.textToCheck = pastedText;
-
-    this.checkerSubject.next(this.textToCheck);
+    this.textToCheck = (event.target as HTMLInputElement).value;
   }
 
   checkGrammar(prompt: string) {
+    this.returned = [];
+    this.showMobileResult = this.currentScreenSize < 768;
+    this.isLoading = true;
     this.openAiService.checkGrammar(prompt).subscribe(
       (response: any) => {
-        console.log('response', response);
+        console.log(response);
 
-        this.checkedResponse = response.choices[0].message.content;
-        const responseToJson: any = JSON.parse(this.checkedResponse);
+        // FOR OPENAI CHATGPT API
+        if (response.choices[0].finish_reason === 'length') {
+          this.toastService.setToastMessage(
+            'Max Tokens, please adjust and reduce your input.',
+            ToastMessageType.Error
+          );
 
-        console.log(responseToJson);
+          this.isLoading = false;
+        }
+
+        let JsonResponse = JSON.parse(response.choices[0].message.content);
+        this.returned = JsonResponse.sentences;
+
+        if (this.returned) {
+          this.toastService.setToastMessage(
+            'Sentence Successfully Loaded!',
+            ToastMessageType.Success
+          );
+        }
+
+        this.isLoading = false;
+        console.log('isLoading', this.isLoading);
+        console.log('showMobileResult', this.showMobileResult);
+
+        // FOR CLAUDE API
+        // if (response.stop_reason === 'max_tokens') {
+        //   this.errorMessage = 'Max Tokens please adjust and lessen you input.';
+        // } else {
+        //   this.checkedResponse = response.content[0].text;
+        //   const responseToJson: any = JSON.parse(this.checkedResponse);
+
+        //   this.returned = responseToJson;
+        //   console.log(responseToJson);
+        //   this.errorMessage = '';
+        // }
       },
       (error) => {
         console.log('Error', error);
+
+        if (error.name === 'HttpErrorResponse') {
+          this.toastService.setToastMessage(
+            'Please check your connection and try again!',
+            ToastMessageType.Error
+          );
+          this.isLoading = false;
+        }
       }
     );
   }
 
-  // findWrongSpellingInSentence(index: any) {
-  //   this.returned.wrong_spelling_words_each_sentence.wrong_spelling_words.forEach(
-  //     (item: any) => {
-  //       this.wrongSpellingWords.push(item);
-  //     }
-  //   );
-  // }
+  returned: any = [];
 
-  // hasWrongSpellingWord(index: number) {
-  //   this.returned.breakdown_user_input_sentences.user_input_breakdown.forEach(
-  //     (item: any) => {
-  //       this.originalSentence.push(item);
-  //     }
-  //   );
-  // }
+  correctWrongWord(rowWord: any, itemId: any) {
+    this.returned.map((item: any) => {
+      item.words.map((word: any) => {
+        if (item.id === itemId && word.id === rowWord.id) {
+          word.original = word.corrected;
+          word.corrected = '';
+          word.problem_label = '';
+        }
+      });
+    });
+  }
 
-  // hasWrongVerbTenses(index: number): boolean {
-  //   return this.returned.verb_tenses_words.user_input_wrong_verb_tenses.some(
-  //     (entry: { what_sentence_array_number_belong: number }) =>
-  //       entry.what_sentence_array_number_belong === index
-  //   );
-  // }
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.currentScreenSize = event.target.innerWidth;
+    this.updateShowMobileResult(event.target.innerWidth);
+  }
 
-  // Find sentence in array with belong number: 1
-  // Focus to that array and search wrong spelling words:  ['hotl', 'droped', 'lugage']
+  updateShowMobileResult(width: number) {
+    if (this.showMobileResult) {
+      this.showMobileResult = width < 768;
 
-  // getWrongVerbTensesWords(index: number, sentence: string): string[] {
-  //   const entry =
-  //     this.returned.verb_tenses_words.user_input_wrong_verb_tenses.find(
-  //       (entry: { what_sentence_array_number_belong: number }) =>
-  //         entry.what_sentence_array_number_belong === index
-  //     );
-
-  //   return entry ? entry.verb_tense_word : [];
-  // }
-
-  returned: any = {
-    wrong_spelling_words_each_sentence: {
-      wrong_spelling_words: [
-        {
-          what_sentence_array_number_belong: 1,
-          wrong_spelling_word: ['hotl', 'droped', 'lugage'],
-          corrected: ['hotel', 'dropped', 'luggage'],
-        },
-        {
-          what_sentence_array_number_belong: 4,
-          wrong_spelling_word: ['maried'],
-          corrected: ['married'],
-        },
-      ],
-      isCorrect: false,
-    },
-    breakdown_user_input_sentences: {
-      user_input_breakdown: [
-        'I will ate fish for dinner and drank milk',
-        'When the girl on the team got to the hotl, they droped off her lugage',
-        'We all eat the fish and then made dessert',
-        'We enjoys horror movies',
-        'Anna and Pat are maried; he have been together for 20 years',
-      ],
-      correct_grammar: [
-        'I will eat fish for dinner and drink milk.',
-        'When the girl on the team got to the hotel, they dropped off her luggage.',
-        'We all ate the fish and then made dessert.',
-        'We enjoy horror movies.',
-        'Anna and Pat are married; they have been together for 20 years.',
-      ],
-      rephrase_sentence: [
-        'I will eat fish for dinner and drink milk.',
-        'When the girl on the team arrived at the hotel, they unloaded her luggage.',
-        'We all ate the fish and then prepared dessert.',
-        'We enjoy horror movies.',
-        'Anna and Pat are married; they have been together for 20 years.',
-      ],
-    },
-    verb_tenses_words: {
-      user_input_wrong_verb_tenses: [
-        {
-          what_sentence_array_number_belong: 0,
-          verb_tense_word: ['ate', 'drank'],
-          corrected: ['eat', 'drink'],
-        },
-        {
-          what_sentence_array_number_belong: 2,
-          verb_tense_word: ['eat'],
-          corrected: ['ate'],
-        },
-        {
-          what_sentence_array_number_belong: 3,
-          verb_tense_word: ['enjoys'],
-          corrected: ['enjoy'],
-        },
-      ],
-    },
-    singular_plurals: {
-      user_input_wrong_singular_plurals: [
-        {
-          what_sentence_array_number_belong: 4,
-          singular_plural: ['he'],
-          corrected: ['they'],
-        },
-      ],
-    },
-  };
+      console.log('isLoading', this.isLoading);
+      console.log('showMobileResult', this.showMobileResult);
+    }
+  }
 }

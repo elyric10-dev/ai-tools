@@ -1,0 +1,33 @@
+<div class="flex flex-col gap-1 fixed top-2 right-6 z-50 parent-container">
+  <div
+    (click)="closeToast(toastData)"
+    *ngFor="let toastData of toastDatas"
+    id="message-toast"
+    class="flex items-center gap-2 z-50 font-[500] text-sm px-2 py-2 border-1 border-l-4 rounded shadow-[5px_5px_10px_-2px_rgba(0,0,0,0.5)] cursor-default transition-transform duration-500 ease-in-out"
+    [class]="toastData.show ? 'translate-x-0' : ''"
+    [ngClass]="{
+    'translate-x-96': !toastData.message || !toastData.show,
+    'bg-red-100 text-red-600 border-red-600': toastData.type === 'error',
+    'bg-green-100 text-green-600 border-green-600': toastData.type === 'success',
+    'bg-yellow-100 text-yellow-600 border-yellow-600': toastData.type === 'warning',
+    'bg-blue-100 text-blue-600 border-blue-600': toastData.type === 'info',
+  }"
+  >
+    {{ toastData.message }}
+    <div
+      (click)="closeToast(toastData)"
+      class="rounded-full bg-white h-6 w-6 cursor-pointer scale-[.60] hover:scale-75 transition-transform duration-300"
+    >
+      <mat-icon
+        class="transition-colors duration-300"
+        [ngClass]="{
+          'text-red-400 hover:text-red-600': toastData.type === 'error',
+          'text-green-400 hover:text-green-600': toastData.type === 'success',
+          'text-yellow-400 hover:text-yellow-600': toastData.type === 'warning',
+          'text-blue-400 hover:text-blue-600': toastData.type === 'info',
+        }"
+        >close</mat-icon
+      >
+    </div>
+  </div>
+</div>
