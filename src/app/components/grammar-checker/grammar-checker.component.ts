@@ -6,7 +6,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
-import { OpenAiService } from '../../open-ai.service';
 import { ClaudeService } from '../../claude.service';
 import {
   ToastMessageService,
@@ -14,6 +13,7 @@ import {
 } from '../toast-message/toast-message.service';
 import { MatDialog } from '@angular/material/dialog';
 import { SentenceModalComponent } from './sentence/sentence-modal/sentence-modal.component';
+import { OpenAiService } from '../../open-ai.service';
 
 @Component({
   selector: 'app-grammar-checker',
@@ -53,8 +53,6 @@ export class GrammarCheckerComponent implements OnInit {
   isButton2Clicked = false;
   isShowOptions = false;
 
-
-
   // showOptions() {
   //   this.isShowOptions = !this.isShowOptions;
   // }
@@ -73,9 +71,7 @@ export class GrammarCheckerComponent implements OnInit {
     this.isButton2Clicked = false;
   }
 
-  ngOnInit(): void {
-    this.currentScreenSize = window.innerWidth;
-  }
+  ngOnInit(): void {}
 
   hideShowMobileResult() {
     this.showMobileResult = !this.showMobileResult;
