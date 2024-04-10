@@ -1,10 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  HostListener,
-  OnInit,
-  ViewChild,
-} from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
 import { ClaudeService } from '../../claude.service';
 import {
@@ -21,24 +15,21 @@ import { OpenAiService } from '../../open-ai.service';
   styleUrl: './grammar-checker.component.scss',
 })
 export class GrammarCheckerComponent implements OnInit {
-  @ViewChild('button1') button1!: ElementRef;
-  @ViewChild('button2') button2!: ElementRef;
-
   private checkerSubject = new Subject<string>();
   checkedResponse: any = '';
   textToCheck: string = '';
   isLoading: boolean = false;
-
-  correctGrammarElement =
-    this.elementRef.nativeElement.querySelector('.correct-grammar');
-  isHoveringOriginalSentence: boolean[] = [false];
+  currentTitle: string = 'GRAMMAR CHECKER';
 
   errorMessage: string = '';
   showMobileResult: boolean = false;
+  showDesktopResult: boolean = false;
   currentScreenSize: number = 0;
 
+  returned: any = [];
+  isOpenOptions: boolean = false;
+
   constructor(
-    private elementRef: ElementRef,
     private openAiService: OpenAiService,
     private claudeService: ClaudeService,
     private toastService: ToastMessageService,
@@ -52,10 +43,9 @@ export class GrammarCheckerComponent implements OnInit {
   isButton1Clicked = false;
   isButton2Clicked = false;
   isShowOptions = false;
-
-  // showOptions() {
-  //   this.isShowOptions = !this.isShowOptions;
-  // }
+  selectedOption: string = 'Grammar Checker';
+  notSelectedOption: string = 'Paraphrase';
+  isSelectedGrammar: boolean = true;
 
   onClick() {
     console.log('clicked!');
@@ -78,16 +68,13 @@ export class GrammarCheckerComponent implements OnInit {
     console.log('clicked!', this.showMobileResult);
   }
 
-  // openGrammarParaphrase() {
-  // }
-
   inputtedText(event: Event) {
     this.textToCheck = (event.target as HTMLInputElement).value;
   }
 
   checkGrammar(prompt: string) {
     this.returned = [];
-    this.showMobileResult = this.currentScreenSize < 768;
+    this.showMobileResult = !this.showMobileResult;
     this.isLoading = true;
     this.openAiService.checkGrammar(prompt).subscribe(
       (response: any) => {
@@ -143,8 +130,6 @@ export class GrammarCheckerComponent implements OnInit {
     );
   }
 
-  returned: any = [];
-
   correctWrongWord(rowWord: any, itemId: any) {
     this.returned.map((item: any) => {
       item.words.map((word: any) => {
@@ -164,11 +149,29 @@ export class GrammarCheckerComponent implements OnInit {
   }
 
   updateShowMobileResult(width: number) {
-    if (this.showMobileResult) {
-      this.showMobileResult = width < 768;
-
-      console.log('isLoading', this.isLoading);
-      console.log('showMobileResult', this.showMobileResult);
+    if (width < 768) {
+      this.showMobileResult = true;
+    } else if (width > 768) {
+      this.showDesktopResult = true;
+    } else {
+      this.showMobileResult = false;
+      this.showDesktopResult = false;
     }
+
+    console.log('isLoading', this.isLoading);
+    console.log('showMobileResult', this.showMobileResult);
+  }
+
+  openOptions() {
+    this.isOpenOptions = !this.isOpenOptions;
+  }
+
+  selectOption() {
+    this.isSelectedGrammar = !this.isSelectedGrammar;
+    this.currentTitle = this.isSelectedGrammar
+      ? 'Grammar Checker'.toLocaleUpperCase()
+      : 'Paraphrase'.toLocaleUpperCase();
+
+    this.isOpenOptions = false;
   }
 }

@@ -4,7 +4,7 @@
     <span
       class="pt-4 text-transparent text-center text-5xl font-bold bg-clip-text moving-gradient"
     >
-      GRAMMAR CHECKER
+      {{ currentTitle }}
     </span>
   </div>
   <!-- CONTENT -->
@@ -20,7 +20,6 @@
     <!-- CHECK GRAMMAR BUTTON -->
     <div class="flex justify-center">
       <button
-        *ngIf="!showMobileResult"
         (click)="checkGrammar(textToCheck)"
         [disabled]="isLoading || !textToCheck"
         class="fixed bottom-4 md:static w-20 h-20 flex items-center justify-center border-2 rounded-full scale-90 transition-all duration-200"
@@ -54,7 +53,7 @@
         <mat-icon class="md:hidden">close</mat-icon>
       </button>
 
-      <!-- REOPEN MOBILE VIEW -->
+      <!-- REOPEN RESULT PANEL ON MOBILE VIEW -->
       <button
         *ngIf="!showMobileResult"
         (click)="hideShowMobileResult()"
@@ -74,7 +73,7 @@
     <div
       class="w-full h-full absolute top-0 left-0 md:relative transition-transform duration-500 ease-in-out"
       [class]="
-        showMobileResult ? 'translate-y-4 md:translate-y-0' : 'md:translate-y-0'
+        showMobileResult ? 'translate-y-4 md:translate-y-0' : 'translate-y-0'
       "
       [ngClass]="{
         'translate-y-[200%] md:translate-y-0': !showMobileResult
@@ -82,8 +81,11 @@
     >
       <div class="relative w-full h-full flex justify-center">
         <div
-          class="w-[93%] h-[80%] md:w-full md:h-[70vh] bg-gray-200 text-white focus:outline-none pl-4 pr-4 py-12 border-2 border-blue-900 rounded-xl shadow-[8px_8px_15px_-7px_rgba(150,180,255,0.6)] overflow-y-auto hidden-scrollbar"
+          class="relative w-[93%] h-[80%] md:w-full md:h-[70vh] bg-gray-200 focus:outline-none pl-4 pr-4 py-12 border-2 border-blue-900 rounded-xl shadow-[8px_8px_15px_-7px_rgba(150,180,255,0.6)] overflow-y-auto hidden-scrollbar"
         >
+          <!-- SHIMMERING -->
+          <app-shimmer-skeleton *ngIf="isLoading"></app-shimmer-skeleton>
+
           <span *ngFor="let item of returned; let i = index">
             <span class="original-sentence">
               <ng-container *ngFor="let word of item.words">
@@ -103,6 +105,45 @@
               </ng-container>
             </span>
           </span>
+
+          <!-- MORE OPTIONS -->
+          <div class="absolute md:fixed bottom-4 right-4">
+            <div
+              class="w-44 h-0 flex items-center justify-end rounded transition-all duration-200 overflow-hidden"
+              [class]="
+                'bg-gray-200 border-blue-900 shadow-[2px_2px_10px_-2px_rgba(150,180,255,0.6)] hover:shadow-[2px_2px_10px_0px_rgba(150,180,255,0.6)] hover:bg-blue-100'
+              "
+              [ngClass]="{
+                'h-12 border-2': isOpenOptions
+              }"
+              (click)="selectOption()"
+            >
+              <div class="w-full flex items-center justify-between px-2">
+                <span class="cursor-default">{{
+                  !isSelectedGrammar ? "Grammar Checker" : "Paraphrase"
+                }}</span>
+              </div>
+            </div>
+            <div
+              class="w-44 h-12 flex items-center justify-end border-2 rounded transition-all duration-200"
+              [class]="
+                'bg-[#14274E] border-blue-900 shadow-[2px_2px_10px_-2px_rgba(150,180,255,0.6)] hover:shadow-[2px_2px_10px_0px_rgba(150,180,255,0.6)]'
+              "
+            >
+              <div class="w-full flex items-center justify-between px-2">
+                <span class="text-gray-100 cursor-default">{{
+                  isSelectedGrammar ? "Grammar Checker" : "Paraphrase"
+                }}</span>
+                <button
+                  (click)="openOptions()"
+                  class="bg-gray-100 flex items-center justify-center rounded-full cursor-pointer"
+                >
+                  <mat-icon *ngIf="!isOpenOptions">keyboard_arrow_up</mat-icon>
+                  <mat-icon *ngIf="isOpenOptions">keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

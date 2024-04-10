@@ -15,6 +15,7 @@ import { GrammarCheckerComponent } from './components/grammar-checker/grammar-ch
 import { ToastMessageComponent } from './components/toast-message/toast-message.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { SentenceModalComponent } from './components/grammar-checker/sentence/sentence-modal/sentence-modal.component';
+import { ShimmerSkeletonComponent } from './components/shimmer-skeleton/shimmer-skeleton.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { SentenceModalComponent } from './components/grammar-checker/sentence/se
     GrammarCheckerComponent,
     ToastMessageComponent,
     SentenceModalComponent,
+    ShimmerSkeletonComponent,
   ],
   imports: [
     BrowserModule,
