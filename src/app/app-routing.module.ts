@@ -6,6 +6,7 @@ import { GrammarCheckerComponent } from './components/grammar-checker/grammar-ch
 const routes: Routes = [
   { path: 'image-gen', component: ImageGenComponent },
   { path: 'grammar-checker', component: GrammarCheckerComponent },
+  { path: 'paraphrase', component: GrammarCheckerComponent },
 ];
 
 @NgModule({

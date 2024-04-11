@@ -1,4 +1,10 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  Inject,
+  OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
 import { Subject, debounceTime } from 'rxjs';
 import { ClaudeService } from '../../claude.service';
 import {
@@ -8,6 +14,8 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { SentenceModalComponent } from './sentence/sentence-modal/sentence-modal.component';
 import { OpenAiService } from '../../open-ai.service';
+import { isPlatformBrowser } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-grammar-checker',
@@ -15,7 +23,9 @@ import { OpenAiService } from '../../open-ai.service';
   styleUrl: './grammar-checker.component.scss',
 })
 export class GrammarCheckerComponent implements OnInit {
+  public innerWidth: any;
   private checkerSubject = new Subject<string>();
+  currentPath: string = '';
   checkedResponse: any = '';
   textToCheck: string = '';
   isLoading: boolean = false;
@@ -23,49 +33,48 @@ export class GrammarCheckerComponent implements OnInit {
 
   errorMessage: string = '';
   showMobileResult: boolean = false;
-  showDesktopResult: boolean = false;
   currentScreenSize: number = 0;
 
   returned: any = [];
   isOpenOptions: boolean = false;
+  isMobileScreen: boolean = false;
+
+  isSelectedGrammar: boolean = true;
 
   constructor(
     private openAiService: OpenAiService,
     private claudeService: ClaudeService,
     private toastService: ToastMessageService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private route: ActivatedRoute
   ) {
     this.checkerSubject
       .pipe(debounceTime(1000))
       .subscribe(() => this.checkGrammar(this.textToCheck));
+
+    this.currentPath = this.route.snapshot.url.join('/');
+    this.isSelectedGrammar = this.currentPath === 'paraphrase' ? false : true;
+    this.currentTitle = this.isSelectedGrammar
+      ? 'Grammar Checker'.toLocaleUpperCase()
+      : 'Paraphrase'.toLocaleUpperCase();
   }
 
-  isButton1Clicked = false;
-  isButton2Clicked = false;
-  isShowOptions = false;
-  selectedOption: string = 'Grammar Checker';
-  notSelectedOption: string = 'Paraphrase';
-  isSelectedGrammar: boolean = true;
-
-  onClick() {
-    console.log('clicked!');
-    this.isButton1Clicked = true;
-    this.isButton2Clicked = true;
-    // this.isShowOptions = !this.isShowOptions;
-
-    this.dialog.open(SentenceModalComponent, { panelClass: 'panelClass' });
+  ngOnInit(): void {
+    this.getWindowWidth();
   }
 
-  resetFlags() {
-    this.isButton1Clicked = false;
-    this.isButton2Clicked = false;
-  }
+  getWindowWidth() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.innerWidth = window.innerWidth;
 
-  ngOnInit(): void {}
+      if (this.innerWidth <= 768) this.isMobileScreen = true;
+      else this.isMobileScreen = false;
+    } else console.log('Window object is not available on the server');
+  }
 
   hideShowMobileResult() {
     this.showMobileResult = !this.showMobileResult;
-    console.log('clicked!', this.showMobileResult);
   }
 
   inputtedText(event: Event) {
@@ -74,12 +83,12 @@ export class GrammarCheckerComponent implements OnInit {
 
   checkGrammar(prompt: string) {
     this.returned = [];
-    this.showMobileResult = !this.showMobileResult;
+    this.showMobileResult = this.isMobileScreen
+      ? !this.showMobileResult
+      : false;
     this.isLoading = true;
     this.openAiService.checkGrammar(prompt).subscribe(
       (response: any) => {
-        console.log(response);
-
         // FOR OPENAI CHATGPT API
         if (response.choices[0].finish_reason === 'length') {
           this.toastService.setToastMessage(
@@ -101,8 +110,6 @@ export class GrammarCheckerComponent implements OnInit {
         }
 
         this.isLoading = false;
-        console.log('isLoading', this.isLoading);
-        console.log('showMobileResult', this.showMobileResult);
 
         // FOR CLAUDE API
         // if (response.stop_reason === 'max_tokens') {
@@ -130,7 +137,8 @@ export class GrammarCheckerComponent implements OnInit {
     );
   }
 
-  correctWrongWord(rowWord: any, itemId: any) {
+  correctWrongWord(rowWord: any, itemId: any, event: any) {
+    event.stopPropagation();
     this.returned.map((item: any) => {
       item.words.map((word: any) => {
         if (item.id === itemId && word.id === rowWord.id) {
@@ -149,17 +157,8 @@ export class GrammarCheckerComponent implements OnInit {
   }
 
   updateShowMobileResult(width: number) {
-    if (width < 768) {
-      this.showMobileResult = true;
-    } else if (width > 768) {
-      this.showDesktopResult = true;
-    } else {
-      this.showMobileResult = false;
-      this.showDesktopResult = false;
-    }
-
-    console.log('isLoading', this.isLoading);
-    console.log('showMobileResult', this.showMobileResult);
+    if (width < 768) this.isMobileScreen = true;
+    else this.isMobileScreen = false;
   }
 
   openOptions() {
@@ -171,7 +170,43 @@ export class GrammarCheckerComponent implements OnInit {
     this.currentTitle = this.isSelectedGrammar
       ? 'Grammar Checker'.toLocaleUpperCase()
       : 'Paraphrase'.toLocaleUpperCase();
+    this.updateUrl();
 
     this.isOpenOptions = false;
+  }
+
+  updateUrl() {
+    const baseUrl = `${window.location.origin}`;
+    const newUrl = this.isSelectedGrammar
+      ? `${baseUrl}/grammar-checker`
+      : `${baseUrl}/paraphrase`;
+    window.history.replaceState(null, '', newUrl);
+  }
+
+  showFixed(row: any) {
+    const data = {
+      title: this.isSelectedGrammar ? 'GRAMMAR' : 'REPHRASE',
+      sentence: this.isSelectedGrammar ? row.correct_grammar : row.rephrase,
+    };
+    this.dialog
+      .open(SentenceModalComponent, {
+        data,
+        panelClass: 'panelClass',
+        width: '380px',
+      })
+      .afterClosed()
+      .subscribe((result) => {
+        if (result) {
+          this.returned.map((item: any) => {
+            if (item.id === row.id) {
+              item.words = [];
+              item.words[0] = {
+                id: 1,
+                original: result,
+              };
+            }
+          });
+        }
+      });
   }
 }

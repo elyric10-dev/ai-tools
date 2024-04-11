@@ -55,7 +55,7 @@
 
       <!-- REOPEN RESULT PANEL ON MOBILE VIEW -->
       <button
-        *ngIf="!showMobileResult"
+        *ngIf="isMobileScreen && !showMobileResult"
         (click)="hideShowMobileResult()"
         class="fixed bottom-4 right-4 w-20 h-20 md:hidden flex items-center justify-center border-2 rounded-full scale-90 transition-all duration-200"
         [class]="
@@ -73,10 +73,13 @@
     <div
       class="w-full h-full absolute top-0 left-0 md:relative transition-transform duration-500 ease-in-out"
       [class]="
-        showMobileResult ? 'translate-y-4 md:translate-y-0' : 'translate-y-0'
+        showMobileResult && isMobileScreen
+          ? 'translate-y-4 md:translate-y-0'
+          : 'translate-y-0'
       "
       [ngClass]="{
-        'translate-y-[200%] md:translate-y-0': !showMobileResult
+        'translate-y-[200%] md:translate-y-0':
+          !showMobileResult && isMobileScreen
       }"
     >
       <div class="relative w-full h-full flex justify-center">
@@ -86,17 +89,19 @@
           <!-- SHIMMERING -->
           <app-shimmer-skeleton *ngIf="isLoading"></app-shimmer-skeleton>
 
+          <!-- SENTENCES -->
           <span *ngFor="let item of returned; let i = index">
-            <span class="original-sentence">
+            <span class="original-sentence" (click)="showFixed(item)">
               <ng-container *ngFor="let word of item.words">
                 <span class="highlight-problem">
-                  <div class="corrected-problem">
+                  <div
+                    class="corrected-problem"
+                    (click)="correctWrongWord(word, item.id, $event)"
+                  >
                     <span class="text-[10px]">{{
                       word.problem_label + ":"
                     }}</span>
-                    <span (click)="correctWrongWord(word, item.id)">{{
-                      word.corrected ? word.corrected : ""
-                    }}</span>
+                    <span>{{ word.corrected ? word.corrected : "" }}</span>
                   </div>
                   <span>{{ word.corrected ? word.original : "" }}</span>
                 </span>
@@ -150,7 +155,7 @@
   </div>
 
   <!-- Options -->
-  <button
+  <!-- <button
     (click)="onClick()"
     #button1
     class="absolute hidden px-4 py-2 bg-[#1D2E40] hover:bg-[#344C5D] rounded shadow-[2px_2px_10px_-2px_rgba(0,0,0,0.5)] transition-colors duration-200"
@@ -165,5 +170,5 @@
     *ngIf="!isButton1Clicked && !isButton2Clicked"
   >
     Paraphrase
-  </button>
+  </button> -->
 </div>
