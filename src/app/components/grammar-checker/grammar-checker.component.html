@@ -1,29 +1,28 @@
 <div class="relative w-screen h-screen overflow-hidden">
   <app-toast-message></app-toast-message>
-  <div class="w-full bg-transparent flex justify-center items-center">
+  <div class="w-full flex justify-center items-center">
     <span
-      class="pt-4 text-transparent bg-clip-text text-5xl font-bold moving-gradient"
+      class="pt-4 text-transparent text-center text-5xl font-bold bg-clip-text moving-gradient"
     >
-      GRAMMAR CHECKER
+      {{ currentTitle }}
     </span>
   </div>
   <!-- CONTENT -->
-  <div class="flex flex-col md:flex-row gap-6 p-6">
+  <div class="flex flex-col md:flex-row gap-4 p-4">
     <!-- USER INPUT -->
 
     <textarea
       (keyup)="inputtedText($event)"
-      class="w-full h-[70vh] backdrop-blur-sm bg-[rgba(255,255,255,0.5)] text-blue-900 focus:outline-none pl-6 pr-4 py-10 border-2 border-blue-900 rounded-xl shadow-[8px_8px_15px_-7px_rgba(150,180,255,0.6)] hidden-scrollbar resize-none"
-      placeholder="Start by writing, pasting (Ctrl + V) text, or uploading a document (doc, pdf)."
+      class="w-full h-[70vh] backdrop-blur-sm bg-[rgba(255,255,255,0.5)] text-blue-900 focus:outline-none pl-4 pr-4 py-10 border-2 border-blue-900 rounded-xl shadow-[8px_8px_15px_-7px_rgba(150,180,255,0.6)] hidden-scrollbar resize-none"
+      placeholder="Start by writing or pasting (Ctrl + V) text."
     ></textarea>
 
     <!-- CHECK GRAMMAR BUTTON -->
     <div class="flex justify-center">
       <button
-        *ngIf="!showMobileResult"
         (click)="checkGrammar(textToCheck)"
         [disabled]="isLoading || !textToCheck"
-        class="fixed bottom-6 md:static w-12 h-12 flex items-center justify-center border-2 rounded-full scale-90 transition-all duration-200"
+        class="fixed bottom-4 md:static w-20 h-20 flex items-center justify-center border-2 rounded-full scale-90 transition-all duration-200"
         [class]="
           isLoading || !textToCheck
             ? 'bg-gray-400 border-black'
@@ -41,7 +40,7 @@
         (click)="hideShowMobileResult()"
         *ngIf="showMobileResult"
         [disabled]="isLoading"
-        class="fixed bottom-6 w-12 h-12 flex items-center justify-center md:hidden border-2 rounded-full scale-90 transition-all duration-200"
+        class="fixed bottom-4 w-20 h-20 flex items-center justify-center md:hidden border-2 rounded-full scale-90 transition-all duration-200"
         [class]="
           isLoading
             ? 'bg-gray-400 border-black'
@@ -54,11 +53,11 @@
         <mat-icon class="md:hidden">close</mat-icon>
       </button>
 
-      <!-- REOPEN MOBILE VIEW -->
+      <!-- REOPEN RESULT PANEL ON MOBILE VIEW -->
       <button
-        *ngIf="!showMobileResult"
+        *ngIf="isMobileScreen && !showMobileResult"
         (click)="hideShowMobileResult()"
-        class="fixed bottom-6 right-6 w-12 h-12 md:hidden flex items-center justify-center border-2 rounded-full scale-90 transition-all duration-200"
+        class="fixed bottom-4 right-4 w-20 h-20 md:hidden flex items-center justify-center border-2 rounded-full scale-90 transition-all duration-200"
         [class]="
           'bg-gray-200 border-blue-900 shadow-[2px_2px_10px_-2px_rgba(150,180,255,0.6)] hover:shadow-[2px_2px_10px_0px_rgba(150,180,255,0.6)] hover:scale-100'
         "
@@ -70,57 +69,39 @@
       </button>
     </div>
 
-    <!-- DESKTOP RESULT -->
-    <!-- CONTINUE FIXING HERE TO CLICK ON WRONG WORDS TO CORRECT.
-    FIX WINDOW IS NOT DEFINED -->
-    <!-- <div
-      class="relative hidden md:block w-full bg-gray-200 text-white focus:outline-none pl-6 pr-4 py-12 border-2 border-blue-900 rounded-xl shadow-[8px_8px_15px_-7px_rgba(150,180,255,0.6)] overflow-y-auto hidden-scrollbar"
-    >
-      <span *ngFor="let item of returned; let i = index">
-        <span
-        >
-          <ng-container *ngFor="let word of item.words">
-            <span class="highlight-problem">
-              <div class="corrected-problem">
-                <span class="text-[10px]">{{ word.problem_label + ":" }}</span>
-                <span (click)="correctWrongWord(word, item.id)">{{
-                  word.corrected ? word.corrected : ""
-                }}</span>
-              </div>
-              <span>{{ word.corrected ? word.original : "" }}</span>
-            </span>
-
-            <span>{{ word.corrected ? "" : word.original }} {{ "" }}</span>
-          </ng-container>
-        </span>
-      </span>
-    </div> -->
-
-    <!-- MOBILE RESULT PANEL -->
+    <!-- RESULT PANEL -->
     <div
       class="w-full h-full absolute top-0 left-0 md:relative transition-transform duration-500 ease-in-out"
       [class]="
-        showMobileResult ? 'translate-y-4 md:translate-y-0' : 'md:translate-y-0'
+        showMobileResult && isMobileScreen
+          ? 'translate-y-4 md:translate-y-0'
+          : 'translate-y-0'
       "
       [ngClass]="{
-        'translate-y-[200%] md:translate-y-0': !showMobileResult
+        'translate-y-[200%] md:translate-y-0':
+          !showMobileResult && isMobileScreen
       }"
     >
       <div class="relative w-full h-full flex justify-center">
         <div
-          class="w-[91%] h-[80%] md:w-full md:h-[70vh] bg-gray-200 text-white focus:outline-none pl-6 pr-4 py-12 border-2 border-blue-900 rounded-xl shadow-[8px_8px_15px_-7px_rgba(150,180,255,0.6)] overflow-y-auto hidden-scrollbar"
+          class="relative w-[93%] h-[80%] md:w-full md:h-[70vh] bg-gray-200 focus:outline-none pl-4 pr-4 py-12 border-2 border-blue-900 rounded-xl shadow-[8px_8px_15px_-7px_rgba(150,180,255,0.6)] overflow-y-auto hidden-scrollbar"
         >
+          <!-- SHIMMERING -->
+          <app-shimmer-skeleton *ngIf="isLoading"></app-shimmer-skeleton>
+
+          <!-- SENTENCES -->
           <span *ngFor="let item of returned; let i = index">
-            <span class="original-sentence">
+            <span class="original-sentence" (click)="showFixed(item)">
               <ng-container *ngFor="let word of item.words">
                 <span class="highlight-problem">
-                  <div class="corrected-problem">
+                  <div
+                    class="corrected-problem"
+                    (click)="correctWrongWord(word, item.id, $event)"
+                  >
                     <span class="text-[10px]">{{
                       word.problem_label + ":"
                     }}</span>
-                    <span (click)="correctWrongWord(word, item.id)">{{
-                      word.corrected ? word.corrected : ""
-                    }}</span>
+                    <span>{{ word.corrected ? word.corrected : "" }}</span>
                   </div>
                   <span>{{ word.corrected ? word.original : "" }}</span>
                 </span>
@@ -129,13 +110,52 @@
               </ng-container>
             </span>
           </span>
+
+          <!-- MORE OPTIONS -->
+          <div class="absolute md:fixed bottom-4 right-4">
+            <div
+              class="w-44 h-0 flex items-center justify-end rounded transition-all duration-200 overflow-hidden"
+              [class]="
+                'bg-gray-200 border-blue-900 shadow-[2px_2px_10px_-2px_rgba(150,180,255,0.6)] hover:shadow-[2px_2px_10px_0px_rgba(150,180,255,0.6)] hover:bg-blue-100'
+              "
+              [ngClass]="{
+                'h-12 border-2': isOpenOptions
+              }"
+              (click)="selectOption()"
+            >
+              <div class="w-full flex items-center justify-between px-2">
+                <span class="cursor-default">{{
+                  !isSelectedGrammar ? "Grammar Checker" : "Paraphrase"
+                }}</span>
+              </div>
+            </div>
+            <div
+              class="w-44 h-12 flex items-center justify-end border-2 rounded transition-all duration-200"
+              [class]="
+                'bg-[#14274E] border-blue-900 shadow-[2px_2px_10px_-2px_rgba(150,180,255,0.6)] hover:shadow-[2px_2px_10px_0px_rgba(150,180,255,0.6)]'
+              "
+            >
+              <div class="w-full flex items-center justify-between px-2">
+                <span class="text-gray-100 cursor-default">{{
+                  isSelectedGrammar ? "Grammar Checker" : "Paraphrase"
+                }}</span>
+                <button
+                  (click)="openOptions()"
+                  class="bg-gray-100 flex items-center justify-center rounded-full cursor-pointer"
+                >
+                  <mat-icon *ngIf="!isOpenOptions">keyboard_arrow_up</mat-icon>
+                  <mat-icon *ngIf="isOpenOptions">keyboard_arrow_down</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Options -->
-  <button
+  <!-- <button
     (click)="onClick()"
     #button1
     class="absolute hidden px-4 py-2 bg-[#1D2E40] hover:bg-[#344C5D] rounded shadow-[2px_2px_10px_-2px_rgba(0,0,0,0.5)] transition-colors duration-200"
@@ -150,5 +170,5 @@
     *ngIf="!isButton1Clicked && !isButton2Clicked"
   >
     Paraphrase
-  </button>
+  </button> -->
 </div>

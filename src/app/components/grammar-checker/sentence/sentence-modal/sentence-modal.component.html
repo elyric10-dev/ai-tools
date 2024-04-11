@@ -6,7 +6,7 @@
   <!-- HEADER TITLE -->
   <span
     class="relative flex flex-col font-bold py-2 [text-shadow:_.5px_1.5px_0_rgb(0_0_0_/_30%)]"
-    >GRAMMAR
+    >{{ title }}
   </span>
   <!-- BORDER BOTTOM -->
   <span class="flex justify-evenly items-end w-full">
@@ -20,13 +20,17 @@
     [ngClass]="contentClass"
   >
     <span class="text-sm text-white">
-      We all ate the fish and then made dessert. We all ate the fish.
+      {{ sentence }}
     </span>
     <button
       class="scale-95 hover:scale-100 transition-transform duration-150 font-bold text-sm py-2 mx-16 rounded-lg drop-shadow-2xl shadow-[3px_3px_5px_-1px_rgba(0,0,0,0.3)]"
       [ngClass]="buttonClass"
     >
-      <span class="[text-shadow:_.5px_1.5px_0_rgb(0_0_0_/_50%)]">CONFIRM</span>
+      <span
+        class="[text-shadow:_.5px_1.5px_0_rgb(0_0_0_/_50%)]"
+        (click)="confirm()"
+        >CONFIRM</span
+      >
     </button>
   </div>
 </div>

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { panelTheme } from '../sentence-style';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-sentence-modal',
@@ -9,6 +10,17 @@ import { panelTheme } from '../sentence-style';
 export class SentenceModalComponent {
   selectedThemeIndex: number = 1;
   panelTheme = panelTheme;
+  title: string = '';
+  sentence: string = '';
+
+  constructor(
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private dialogRef: MatDialogRef<SentenceModalComponent>
+  ) {
+    this.title = data.title;
+    this.sentence = data.sentence;
+    this.selectedThemeIndex = this.data.title === 'GRAMMAR' ? 1 : 0;
+  }
 
   get modalClass() {
     return {
@@ -61,5 +73,9 @@ export class SentenceModalComponent {
       [this.panelTheme[this.selectedThemeIndex].buttonBackgroundColor[1]]: true,
       [this.panelTheme[this.selectedThemeIndex].buttonBackgroundColor[2]]: true,
     };
+  }
+
+  confirm() {
+    this.dialogRef.close(this.sentence);
   }
 }
