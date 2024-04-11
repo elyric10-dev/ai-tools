@@ -10,14 +10,14 @@ export class CivitaiService {
   //   'https://civitai.com/api/v1/creators?limit=3';
 
   private imagesApiUrl = 'https://civitai.com/api/v1/images';
-  private apiKey = '5a89891628dfdffab224976b987e28a8';
+  private CIVITAI_API_KEY = process.env['CIVITAI_API_KEY'];
 
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${this.apiKey}`,
+      Authorization: `Bearer ${this.CIVITAI_API_KEY}`,
     });
   }
 
