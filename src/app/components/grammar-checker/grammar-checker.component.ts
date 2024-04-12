@@ -126,7 +126,13 @@ export class GrammarCheckerComponent implements OnInit {
       (error) => {
         console.log('Error', error);
 
-        if (error.name === 'HttpErrorResponse') {
+        if (error.status === 401) {
+          this.toastService.setToastMessage(
+            'Please check API key or contact Developer.',
+            ToastMessageType.Error
+          );
+          this.isLoading = false;
+        } else if (error.name === 'HttpErrorResponse') {
           this.toastService.setToastMessage(
             'Please check your connection and try again!',
             ToastMessageType.Error

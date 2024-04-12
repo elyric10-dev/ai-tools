@@ -9,7 +9,7 @@ import { environment } from '../environments/environment';
 export class OpenAiService {
   textApiUrl = 'https://api.openai.com/v1/chat/completions';
   imageApiUrl = 'https://api.openai.com/v1/images/generations';
-  apiKey = environment.OPENAI_API_KEY;
+  apiKey = environment.OPENAI_K;
 
   constructor(private http: HttpClient) {}
 
