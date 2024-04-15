@@ -6,7 +6,7 @@ import {
   BrowserModule,
   provideClientHydration,
 } from '@angular/platform-browser';
-
+import { EnvServiceProvider } from './services/env.service.provider';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ImageGenComponent } from './components/image-gen/image-gen.component';
@@ -34,7 +34,11 @@ import { ShimmerSkeletonComponent } from './components/shimmer-skeleton/shimmer-
     MatDialogModule,
     MatProgressSpinner,
   ],
-  providers: [provideClientHydration(), provideAnimationsAsync()],
+  providers: [
+    EnvServiceProvider,
+    provideClientHydration(),
+    provideAnimationsAsync(),
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
