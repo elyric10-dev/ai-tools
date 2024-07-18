@@ -1,6 +1,8 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { EnvService } from './services/env.service';
+// import { environment } from '../environments/environment.prod';
 
 @Injectable({
   providedIn: 'root',
@@ -8,9 +10,9 @@ import { Observable } from 'rxjs';
 export class OpenAiService {
   textApiUrl = 'https://api.openai.com/v1/chat/completions';
   imageApiUrl = 'https://api.openai.com/v1/images/generations';
-  apiKey = process.env['OPENAI_API_KEY'];
+  apiKey = this.environment.OPENAI_API_KEY;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private environment: EnvService) {}
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
